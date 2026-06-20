@@ -1,0 +1,9 @@
+name: vibe-coding-hackathon
+infra:
+  provider: bicep
+services:
+  api:
+    project: .
+    language: py
+    host: appservice
+    startupCommand: gunicorn -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT main:app
