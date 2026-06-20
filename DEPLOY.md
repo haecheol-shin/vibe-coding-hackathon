@@ -2,6 +2,8 @@
 
 이 프로젝트는 FastAPI 웹 앱이며 Azure App Service 배포를 기본 경로로 사용합니다.
 
+백엔드 코드는 `backend/`, 프런트엔드 정적 파일은 `frontend/`에 있습니다. 루트의 `main.py`와 `requirements.txt`는 Azure App Service 호환을 위한 진입점입니다.
+
 ## 1. 로컬 실행
 
 ```bash

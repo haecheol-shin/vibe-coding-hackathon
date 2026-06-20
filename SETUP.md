@@ -10,7 +10,7 @@
 
 ## 현재 MVP 실행
 
-개인 생산성 웹앱 MVP는 Python/FastAPI 백엔드가 Vue.js 정적 화면과 CopilotKit SDK 엔드포인트를 함께 서빙합니다.
+개인 생산성 웹앱 MVP는 Python/FastAPI 백엔드가 Vue.js 정적 화면과 CopilotKit SDK 엔드포인트를 함께 서빙합니다. 작업 충돌을 줄이기 위해 백엔드는 `backend/`, 프런트엔드는 `frontend/`에서 작업합니다.
 
 ```powershell
 pip install -r requirements.txt
@@ -21,7 +21,9 @@ uvicorn main:app --reload
 - 헬스체크: `http://127.0.0.1:8000/health`
 - CopilotKit SDK 엔드포인트: `http://127.0.0.1:8000/copilotkit`
 - GitHub Copilot SDK 코치 API: `http://127.0.0.1:8000/api/productivity/coach`
-- 프런트엔드: Vue.js CDN 기반 MVP. Node.js 설치 후 Vite Vue 구조로 확장 예정.
+- 백엔드 작업 공간: `backend/`
+- 프런트엔드 작업 공간: `frontend/`
+- 자세한 경계: [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
 
 > 팀 리더가 미리 만들어 둔 공용 프로젝트(`vibe-coding-hackathon`)를 clone하면 `.vscode/` 설정(MCP, 음성, Agent)이 자동으로 따라옵니다.
 

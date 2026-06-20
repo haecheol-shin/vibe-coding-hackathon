@@ -1,0 +1,5 @@
+copilotkit==0.1.94
+fastapi==0.138.0
+uvicorn[standard]==0.34.0
+github-copilot-sdk==1.0.2
+python-dotenv==1.0.1

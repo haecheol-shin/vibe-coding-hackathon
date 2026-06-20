@@ -2,6 +2,8 @@
 
 백엔드는 Python/FastAPI로 제공하고, 프런트엔드는 Vue/JavaScript에서 이 API를 호출합니다.
 
+백엔드 구현은 `backend/`에 있고, 프런트엔드 구현은 `frontend/`에 있습니다.
+
 ## Base URL
 
 로컬 백엔드:
