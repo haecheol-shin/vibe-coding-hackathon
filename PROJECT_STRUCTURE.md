@@ -1,15 +1,16 @@
 # Project Structure
 
-이 저장소는 충돌을 줄이기 위해 프런트엔드와 백엔드 작업 공간을 분리합니다.
+이 저장소는 FastAPI가 Vue 정적 화면과 API를 함께 서빙하는 웹앱 구조입니다.
 
-## Ownership
+## Feature Ownership
 
-| 영역 | 담당 | 경로 |
+팀은 프런트엔드/백엔드 역할 분리가 아니라 기능 단위로 담당합니다.
+
+| 영역 | 설명 | 경로 |
 |------|------|------|
-| 백엔드 | Python/FastAPI 담당 | `backend/` |
-| 프런트엔드 | Vue/JavaScript 담당 | `frontend/` |
-| 배포 호환 진입점 | 백엔드 담당 | `main.py`, `requirements.txt`, `startup.sh` |
-| API 계약 문서 | 백엔드 주도, 프런트와 공유 | `API.md` |
+| 기능 구현 | 맡은 기능에 필요한 화면, API, 문서를 함께 수정 | `frontend/`, `backend/`, `API.md` |
+| 배포 호환 진입점 | Azure App Service와 로컬 실행 호환 | `main.py`, `requirements.txt`, `startup.sh` |
+| API 계약 문서 | 기능별 API 요청/응답 계약 공유 | `API.md` |
 
 ## Backend
 
@@ -34,10 +35,10 @@ python -m uvicorn main:app --reload
 
 프런트엔드 정적 파일은 `frontend/`에 있습니다. 현재 FastAPI가 `/`에서 `frontend/index.html`을 반환하고, `/static/*`에서 `frontend/` 파일을 서빙합니다.
 
-프런트 담당자는 가능한 한 아래 파일만 수정합니다.
+화면 수정이 필요한 기능 담당자는 아래 파일을 수정합니다.
 
 - `frontend/index.html`
 - `frontend/app.js`
 - `frontend/styles.css`
 
-Vite/Vue 프로젝트로 확장할 때도 `frontend/` 안에서 진행하고, 백엔드 API 호출 계약은 `API.md`를 기준으로 맞춥니다.
+Vite/Vue 프로젝트로 확장할 때도 `frontend/` 안에서 진행하고, API 호출 계약은 `API.md`를 기준으로 맞춥니다.
