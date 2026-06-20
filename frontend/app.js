@@ -171,6 +171,8 @@ createApp({
       isSavingDiary: false,
       moodEntries: demoMoodEntries,
       kospiEntries: [],
+      kospiMeta: "KOSPI 확인 중",
+      kospiError: "",
       userProfile: loadStoredUserProfile(),
       todos: loadTodos(),
       newAvailabilityWindow: {
@@ -319,6 +321,20 @@ createApp({
     },
     kospiLatest() {
       return this.recentKospiEntries[this.recentKospiEntries.length - 1] || null;
+    },
+    kospiSourceLabel() {
+      if (!this.kospiLatest) {
+        return this.kospiMeta;
+      }
+
+      return this.kospiLatest.source === "pykrx" ? "pykrx 실데이터" : "데모 기준선";
+    },
+    kospiNotice() {
+      if (!this.kospiLatest) {
+        return this.kospiError || "KOSPI 데이터를 다시 불러올 수 있습니다.";
+      }
+
+      return this.kospiLatest.notice || "pykrx에서 조회한 KOSPI 지수입니다.";
     },
     kospiRange() {
       const values = this.recentKospiEntries.map((entry) => Number(entry.close));
@@ -715,16 +731,21 @@ createApp({
       }
     },
     async loadKospiEntries() {
+      this.kospiMeta = "KOSPI 새로고침";
+      this.kospiError = "";
+
       try {
         const response = await fetch("/api/markets/kospi");
 
         if (!response.ok) {
-          return;
+          throw new Error("KOSPI 데이터 요청 실패");
         }
 
         this.kospiEntries = await response.json();
+        this.kospiMeta = this.kospiEntries.some((entry) => entry.source === "fallback-demo") ? "Fallback" : "Live";
       } catch (error) {
-        return;
+        this.kospiError = "KOSPI 데이터를 불러오지 못했습니다.";
+        this.kospiMeta = "재시도 가능";
       }
     },
     async loadTodayDiary() {
@@ -747,6 +768,10 @@ createApp({
     },
     async deleteDiary(entry) {
       if (!entry.entry_id) {
+        return;
+      }
+
+      if (!confirm("이 다이어리 항목을 삭제할까요?")) {
         return;
       }
 
@@ -864,6 +889,10 @@ createApp({
       this.saveUserProfile();
     },
     removeAvailabilityWindow(windowId) {
+      if (!confirm("이 가용 시간대를 삭제할까요?")) {
+        return;
+      }
+
       this.userProfile.availability_windows = this.userProfile.availability_windows.filter((window) => window.id !== windowId);
       this.saveUserProfile();
     },
@@ -956,13 +985,17 @@ createApp({
       this.askCopilot();
     },
     removeTodo(todoId) {
+      if (!confirm("이 투두를 삭제할까요?")) {
+        return;
+      }
+
       this.todos = this.todos.filter((todo) => todo.id !== todoId);
       this.saveTodos();
       this.askCopilot();
     },
     async checkCopilotSdk() {
       try {
-        const response = await fetch("/copilotkit");
+        const response = await fetch("/copilotkit/");
 
         if (!response.ok) {
           throw new Error("SDK unavailable");

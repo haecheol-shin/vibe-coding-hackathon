@@ -21,6 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 try:
     from azure.cosmos import CosmosClient, PartitionKey
@@ -43,6 +44,7 @@ PROJECT_DIR = BASE_DIR.parent
 FRONTEND_DIR = PROJECT_DIR / "frontend"
 
 app = FastAPI(title="개인 생산성 코파일럿 API")
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -107,6 +109,8 @@ class MarketIndexPoint(BaseModel):
     close: float
     change: float
     change_rate: float
+    source: str = "pykrx"
+    notice: str | None = None
 
 
 class ProductivityTask(BaseModel):
@@ -847,6 +851,50 @@ def _market_points_from_closes(rows: list[tuple[date, float]], limit: int = 7) -
     return points
 
 
+def build_kospi_fallback_points(limit: int = 30, reason: str | None = None) -> list[MarketIndexPoint]:
+    closes = [
+        2753.34,
+        2762.45,
+        2757.90,
+        2771.28,
+        2786.61,
+        2791.20,
+        2784.72,
+        2802.35,
+        2810.88,
+        2807.42,
+        2821.70,
+        2833.25,
+        2826.14,
+        2841.66,
+        2854.03,
+        2848.52,
+        2862.78,
+        2870.41,
+        2865.92,
+        2881.30,
+        2894.12,
+        2888.44,
+        2901.76,
+        2910.08,
+        2904.33,
+        2922.57,
+        2931.14,
+        2926.80,
+        2940.22,
+        2951.67,
+    ]
+    end_date = date.today()
+    rows = [(end_date - timedelta(days=len(closes) - index - 1), close) for index, close in enumerate(closes)]
+    points = _market_points_from_closes(rows, limit=limit)
+    notice = reason or "pykrx 실시간 조회 실패로 데모 기준선을 표시합니다."
+
+    return [
+        point.model_copy(update={"source": "fallback-demo", "notice": notice})
+        for point in points
+    ]
+
+
 def fetch_kospi_points_from_pykrx(limit: int = 7) -> list[MarketIndexPoint]:
     try:
         with warnings.catch_warnings():
@@ -1161,7 +1209,13 @@ def get_kospi_points() -> list[MarketIndexPoint]:
     try:
         kospi_cache = fetch_kospi_points(limit=30)
     except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+        if kospi_cache:
+            return [
+                point.model_copy(update={"notice": f"pykrx 재조회 실패로 마지막 캐시를 표시합니다: {exc}"})
+                for point in kospi_cache
+            ]
+
+        kospi_cache = build_kospi_fallback_points(limit=30, reason=str(exc))
 
     kospi_cache_date = today
     return kospi_cache

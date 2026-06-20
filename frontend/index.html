@@ -97,7 +97,9 @@
               <em :class="['market-change', kospiChangeClass]">
                 {{ formatSignedValue(kospiLatest.change) }} · {{ formatSignedPercent(kospiLatest.change_rate) }}
               </em>
+              <small :class="['market-source', { fallback: kospiLatest.source === 'fallback-demo' }]">{{ kospiSourceLabel }}</small>
             </div>
+            <p class="market-notice">{{ kospiNotice }}</p>
             <div class="market-line-chart" aria-label="최근 코스피 선 차트">
               <svg viewBox="0 0 640 220" role="img" aria-label="최근 코스피 추이">
                 <line x1="66" x2="66" y1="24" y2="196" class="chart-axis"></line>
@@ -116,7 +118,10 @@
               </svg>
             </div>
           </div>
-          <p v-else class="ghost compact">현재 코스피 데이터를 불러올 수 없습니다.</p>
+          <div v-else class="empty-action">
+            <p class="ghost compact">현재 코스피 데이터를 불러올 수 없습니다.</p>
+            <button type="button" class="ghost-action" @click="loadKospiEntries">다시 불러오기</button>
+          </div>
         </section>
 
         <section v-show="activeTab === 'coach'" class="coach-layout" aria-label="Copilot 생산성 코치">
@@ -152,7 +157,7 @@
                 {{ isCoaching ? "Copilot 호출 중" : "Ask Copilot Coach" }}
               </button>
             </form>
-            <p class="coach-trust">{{ coachContextSummary }} 컨텍스트가 GitHub Copilot SDK 코치 API로 전달됩니다.</p>
+            <p class="coach-trust">{{ coachContextSummary }} 컨텍스트가 GitHub Copilot SDK 코치 API로 전달됩니다. 일기·투두·가용 시간은 브라우저 로컬 저장소와 서버 메모리에 보관되며, 삭제 버튼으로 개별 항목을 지울 수 있습니다.</p>
             <p v-if="coachError" class="ghost compact">{{ coachError }}</p>
             <article v-if="coachAnswer" class="coach-answer" aria-live="polite">
               <div class="coach-answer-meta">

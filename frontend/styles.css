@@ -1062,6 +1062,35 @@ textarea {
   color: var(--muted);
 }
 
+.market-source {
+  justify-self: start;
+  border-radius: 999px;
+  border: 1px solid rgba(22, 199, 132, 0.35);
+  padding: 4px 9px;
+  color: var(--mood);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.market-source.fallback {
+  border-color: rgba(240, 185, 11, 0.45);
+  color: var(--sun);
+}
+
+.market-notice {
+  margin: 10px 0 12px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.empty-action {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+
 .mood-line-chart,
 .market-line-chart {
   min-height: 190px;
