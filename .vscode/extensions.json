@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "GitHub.copilot",
+    "GitHub.copilot-chat",
+    "ms-vscode.vscode-speech",
+    "ms-vscode.vscode-speech-language-pack-ko-kr",
+    "ms-azuretools.vscode-azure-github-copilot",
+    "ms-vscode.vscode-websearchforcopilot",
+    "ms-vscode.vscode-node-azure-pack"
+  ]
+}

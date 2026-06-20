@@ -1,0 +1,17 @@
+{
+  "servers": {
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "awesome-copilot": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "ghcr.io/microsoft/mcp-dotnet-samples/awesome-copilot:latest"
+      ]
+    }
+  }
+}
