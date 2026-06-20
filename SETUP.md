@@ -2,6 +2,12 @@
 
 팀원용 문서입니다. **Windows + VS Code** 기준으로, 음성 코딩 + GitHub Copilot Agent + Azure 배포까지 대회 당일 쓸 환경을 맞추는 방법을 정리했습니다.
 
+## 대회 필수 조건
+
+- 웹 앱으로 개발합니다. 현재 앱은 개인 생산성 향상 웹앱이며 FastAPI가 Vue 정적 화면과 API를 제공합니다.
+- Copilot SDK를 사용합니다. CopilotKit 엔드포인트(`/copilotkit`)와 GitHub Copilot SDK 기반 백엔드 코치 API(`/api/productivity/coach`)를 제공합니다.
+- Azure 플랫폼으로 배포합니다. 기본 배포 대상은 Azure App Service이며, 배포 절차는 [DEPLOY.md](DEPLOY.md)를 따릅니다.
+
 ## 현재 MVP 실행
 
 개인 생산성 웹앱 MVP는 Python/FastAPI 백엔드가 Vue.js 정적 화면과 CopilotKit SDK 엔드포인트를 함께 서빙합니다.
@@ -14,6 +20,7 @@ uvicorn main:app --reload
 - 웹앱: `http://127.0.0.1:8000/`
 - 헬스체크: `http://127.0.0.1:8000/health`
 - CopilotKit SDK 엔드포인트: `http://127.0.0.1:8000/copilotkit`
+- GitHub Copilot SDK 코치 API: `http://127.0.0.1:8000/api/productivity/coach`
 - 프런트엔드: Vue.js CDN 기반 MVP. Node.js 설치 후 Vite Vue 구조로 확장 예정.
 
 > 팀 리더가 미리 만들어 둔 공용 프로젝트(`vibe-coding-hackathon`)를 clone하면 `.vscode/` 설정(MCP, 음성, Agent)이 자동으로 따라옵니다.
