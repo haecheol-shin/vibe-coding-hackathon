@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import ast
 import json
 import os
 import secrets
@@ -886,50 +885,8 @@ def fetch_kospi_points_from_pykrx(limit: int = 7) -> list[MarketIndexPoint]:
     return _market_points_from_closes(rows, limit=limit)
 
 
-def fetch_kospi_points_from_naver(limit: int = 7) -> list[MarketIndexPoint]:
-    try:
-        end_date = date.today()
-        start_date = end_date - timedelta(days=370)
-        query = urlencode(
-            {
-                "symbol": "KOSPI",
-                "requestType": 1,
-                "startTime": start_date.strftime("%Y%m%d"),
-                "endTime": end_date.strftime("%Y%m%d"),
-                "timeframe": "day",
-            }
-        )
-        request = UrlRequest(
-            f"https://api.finance.naver.com/siseJson.naver?{query}",
-            headers={"User-Agent": "Mozilla/5.0"},
-        )
-
-        with urlopen(request, timeout=10) as response:
-            payload = response.read().decode("euc-kr", errors="ignore")
-
-        table = ast.literal_eval(payload.strip())
-        rows: list[tuple[date, float]] = []
-
-        for row in table[1:]:
-            if not row or len(row) < 5:
-                continue
-
-            trading_date = date.fromisoformat(f"{row[0][:4]}-{row[0][4:6]}-{row[0][6:8]}")
-            rows.append((trading_date, float(row[4])))
-    except Exception as exc:
-        raise RuntimeError("네이버 금융 코스피 요청에 실패했습니다") from exc
-
-    if not rows:
-        raise RuntimeError("네이버 금융이 코스피 지수 데이터를 반환하지 않았습니다")
-
-    return _market_points_from_closes(rows, limit=limit)
-
-
 def fetch_kospi_points(limit: int = 7) -> list[MarketIndexPoint]:
-    try:
-        return fetch_kospi_points_from_pykrx(limit=limit)
-    except RuntimeError:
-        return fetch_kospi_points_from_naver(limit=limit)
+    return fetch_kospi_points_from_pykrx(limit=limit)
 
 
 def clamp_mood_score(score: float) -> float:
@@ -979,7 +936,7 @@ async def ask_copilot(prompt: str, context: str | None = None) -> str:
     except ModuleNotFoundError as exc:
         raise RuntimeError("github-copilot-sdk가 설치되어 있지 않습니다") from exc
 
-    model = os.getenv("COPILOT_MODEL", "gpt-4.1")
+    model = os.getenv("COPILOT_MODEL", "auto")
     timeout = float(os.getenv("COPILOT_REQUEST_TIMEOUT_SECONDS", "90"))
     token = _copilot_token()
     if not token:
@@ -1229,7 +1186,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
-    return ChatResponse(answer=answer, model=os.getenv("COPILOT_MODEL", "gpt-4.1"))
+    return ChatResponse(answer=answer, model=os.getenv("COPILOT_MODEL", "auto"))
 
 
 @app.post("/api/productivity/coach", response_model=ProductivityCoachResponse)
@@ -1246,7 +1203,7 @@ async def productivity_coach(
     completed_tasks = sum(1 for task in request.tasks if task.done)
     return ProductivityCoachResponse(
         answer=answer,
-        model=os.getenv("COPILOT_MODEL", "gpt-4.1"),
+        model=os.getenv("COPILOT_MODEL", "auto"),
         open_tasks=len(request.tasks) - completed_tasks,
         completed_tasks=completed_tasks,
     )

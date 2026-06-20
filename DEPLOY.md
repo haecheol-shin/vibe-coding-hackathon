@@ -34,7 +34,7 @@ az webapp config set \
 az webapp config appsettings set \
   --name "<unique-app-name>" \
   --resource-group "$AZURE_RESOURCE_GROUP" \
-  --settings COPILOT_GITHUB_TOKEN="<token>" COPILOT_MODEL="gpt-4.1" CORS_ORIGINS="https://<frontend-app>.azurestaticapps.net,http://localhost:5173"
+  --settings COPILOT_GITHUB_TOKEN="<token>" COPILOT_MODEL="auto" CORS_ORIGINS="https://<frontend-app>.azurestaticapps.net,http://localhost:5173"
 ```
 
 배포 후 `https://<unique-app-name>.azurewebsites.net/health`가 `{"status":"ok"}`를 반환하면 웹 앱이 올라온 상태입니다.

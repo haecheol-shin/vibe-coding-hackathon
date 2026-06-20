@@ -202,7 +202,7 @@ GET /api/markets/kospi
 ]
 ```
 
-백엔드는 `pykrx`로 KOSPI 지수 티커 `1001`의 최근 데이터를 우선 조회합니다. `pykrx` 지수 조회가 빈 데이터를 반환하는 환경에서는 Naver Finance KOSPI 일별 데이터를 보조 소스로 사용합니다. 응답은 서버에서 일 단위로 캐시합니다.
+백엔드는 `pykrx`로 KOSPI 지수 티커 `1001`의 최근 데이터를 조회합니다. `pykrx` 지수 조회가 빈 데이터를 반환하는 환경에서는 가짜 데이터나 보조 시세 소스로 대체하지 않고 `503` 오류를 반환합니다. 응답은 서버에서 일 단위로 캐시합니다.
 
 ## Productivity Coach
 
@@ -241,7 +241,7 @@ Content-Type: application/json
 ```json
 {
   "answer": "...",
-  "model": "gpt-4.1",
+  "model": "auto",
   "open_tasks": 1,
   "completed_tasks": 1
 }

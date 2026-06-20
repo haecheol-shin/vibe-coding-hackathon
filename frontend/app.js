@@ -141,24 +141,6 @@ function buildDemoMoodEntries() {
   });
 }
 
-function buildDemoKospiEntries() {
-  const closes = [2692.1, 2701.42, 2688.55, 2714.23, 2722.64, 2718.19, 2736.5, 2741.82, 2730.11, 2753.34, 2762.45, 2757.9, 2771.28, 2786.61, 2791.2, 2784.72, 2802.35, 2810.88, 2807.42, 2821.7, 2833.25, 2826.14, 2841.66, 2854.03, 2848.52, 2862.78, 2870.41, 2865.92, 2881.3, 2894.12];
-
-  return closes.map((close, index) => {
-    const daysAgo = closes.length - index - 1;
-    const previousClose = index === 0 ? close : closes[index - 1];
-    const change = Number((close - previousClose).toFixed(2));
-    const changeRate = previousClose === 0 ? 0 : Number(((change / previousClose) * 100).toFixed(2));
-
-    return {
-      trading_date: isoDateDaysAgo(daysAgo),
-      close,
-      change,
-      change_rate: changeRate,
-    };
-  });
-}
-
 createApp({
   data() {
     const demoMoodEntries = buildDemoMoodEntries();
@@ -188,7 +170,7 @@ createApp({
       savedDiary: demoTodayDiary,
       isSavingDiary: false,
       moodEntries: demoMoodEntries,
-      kospiEntries: buildDemoKospiEntries(),
+      kospiEntries: [],
       userProfile: loadStoredUserProfile(),
       todos: loadTodos(),
       newAvailabilityWindow: {
@@ -1034,6 +1016,13 @@ createApp({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             request: prompt,
+            user_profile: {
+              name: this.userProfile.name,
+              available_minutes: this.effectiveAvailableMinutes,
+              usage_minutes: this.effectiveAvailableMinutes,
+              availability_windows: this.userProfile.availability_windows.map(({ start, end }) => ({ start, end })),
+              invests_in_kospi: this.userProfile.invests_in_kospi,
+            },
             energy: this.coachEnergyLevel,
             mood: this.coachMoodLabel,
             focus_sessions: this.completedTodayTodos.length,
