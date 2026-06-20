@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FocusFlow</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main id="app" class="shell" v-cloak>
+      <section class="workspace" aria-label="Productivity workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">FocusFlow</p>
+            <h1>Plan the next useful hour.</h1>
+          </div>
+          <div class="sdk-status">{{ sdkStatus }}</div>
+        </header>
+
+        <section class="controls" aria-label="Planning controls">
+          <label>
+            Energy
+            <select v-model="energy">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+          <label>
+            Available minutes
+            <input v-model.number="availableMinutes" type="number" min="15" max="240" step="15" />
+          </label>
+          <button type="button" :disabled="isPlanning" @click="askCopilot">
+            {{ isPlanning ? "Planning" : "Ask Copilot" }}
+          </button>
+        </section>
+
+        <section class="board" aria-label="Task board">
+          <form class="task-form" @submit.prevent="addTask">
+            <input v-model="newTaskTitle" type="text" placeholder="Add a task" autocomplete="off" />
+            <select v-model="newTaskPriority" aria-label="Task priority">
+              <option value="normal">Normal</option>
+              <option value="high">High</option>
+            </select>
+            <button type="submit">Add</button>
+          </form>
+
+          <div class="columns">
+            <section class="panel" aria-label="Tasks">
+              <div class="panel-heading">
+                <h2>Tasks</h2>
+                <span>{{ tasks.length }}</span>
+              </div>
+              <ul class="task-list">
+                <li v-if="tasks.length === 0" class="ghost">Add one task to start planning.</li>
+                <li v-for="task in tasks" :key="task.id" class="task-item">
+                  <div>
+                    <strong>{{ task.title }}</strong>
+                    <span class="priority">{{ task.priority }}</span>
+                  </div>
+                  <button type="button" aria-label="Remove task" @click="removeTask(task.id)">Done</button>
+                </li>
+              </ul>
+            </section>
+
+            <section class="panel accent" aria-label="Copilot plan">
+              <div class="panel-heading">
+                <h2>Copilot plan</h2>
+                <span>{{ planMeta }}</span>
+              </div>
+              <div class="plan">
+                <p v-if="planError" class="ghost">Copilot planning is unavailable right now.</p>
+                <template v-else-if="plan">
+                  <article class="plan-card">
+                    <strong>Next action</strong>
+                    <span>{{ plan.next_action }}</span>
+                  </article>
+                  <article v-for="block in plan.focus_blocks" :key="block.label" class="plan-card">
+                    <strong>{{ block.label }} - {{ block.minutes }} min</strong>
+                    <span>{{ block.task }}</span>
+                  </article>
+                  <p class="ghost">{{ plan.copilot_note }}</p>
+                </template>
+                <p v-else class="ghost">Ask Copilot to shape your next focus blocks.</p>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>

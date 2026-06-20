@@ -1,0 +1,253 @@
+:root {
+  --paper: #f7f4ed;
+  --ink: #17211b;
+  --muted: #66736c;
+  --line: #d8d0c1;
+  --panel: #fffdf8;
+  --mint: #c9ead8;
+  --teal: #1f776d;
+  --coral: #f1785c;
+  --sun: #f7c95f;
+  --shadow: 0 20px 60px rgba(23, 33, 27, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[v-cloak] {
+  display: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(247, 201, 95, 0.34), transparent 28rem),
+    linear-gradient(135deg, #f7f4ed 0%, #e8f2eb 54%, #f1eee4 100%);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  color: #fffdf8;
+  background: var(--teal);
+  cursor: pointer;
+  min-height: 44px;
+  padding: 0 18px;
+  font-weight: 700;
+}
+
+button:hover {
+  background: #185f57;
+}
+
+.shell {
+  width: min(1160px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.workspace {
+  min-height: calc(100vh - 64px);
+  display: grid;
+  gap: 22px;
+}
+
+.topbar,
+.controls,
+.panel,
+.task-form {
+  border: 1px solid var(--line);
+  background: rgba(255, 253, 248, 0.88);
+  box-shadow: var(--shadow);
+}
+
+.topbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  border-radius: 8px;
+  padding: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--teal);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  max-width: 720px;
+  margin-bottom: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.4rem, 7vw, 5.8rem);
+  line-height: 0.95;
+  letter-spacing: 0;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 1rem;
+}
+
+.sdk-status,
+.panel-heading span {
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: var(--mint);
+  color: #175349;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 14px;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf8;
+  color: var(--ink);
+  padding: 0 12px;
+}
+
+.board {
+  display: grid;
+  gap: 16px;
+}
+
+.task-form {
+  display: grid;
+  grid-template-columns: 1fr 150px auto;
+  gap: 12px;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(320px, 1.08fr);
+  gap: 16px;
+}
+
+.panel {
+  min-height: 390px;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.panel.accent {
+  background: linear-gradient(145deg, rgba(255, 253, 248, 0.95), rgba(201, 234, 216, 0.82));
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.task-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fffdf8;
+}
+
+.task-item strong {
+  overflow-wrap: anywhere;
+}
+
+.priority {
+  color: var(--coral);
+  font-weight: 800;
+}
+
+.ghost {
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgba(255, 253, 248, 0.58);
+}
+
+.plan {
+  display: grid;
+  gap: 12px;
+}
+
+.plan-card {
+  border-radius: 8px;
+  border: 1px solid rgba(31, 119, 109, 0.2);
+  background: rgba(255, 253, 248, 0.82);
+  padding: 14px;
+}
+
+.plan-card strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+@media (max-width: 760px) {
+  .topbar,
+  .controls,
+  .task-form,
+  .columns {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: start;
+  }
+
+  .sdk-status {
+    width: fit-content;
+  }
+}
