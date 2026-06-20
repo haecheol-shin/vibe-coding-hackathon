@@ -11,6 +11,15 @@
   --shadow: 0 20px 60px rgba(23, 33, 27, 0.14);
 }
 
+/* 번들 폰트 — 다른 작업자도 네트워크 없이 사용 가능 (SIL OFL, UnifrakturCook) */
+@font-face {
+  font-family: "UnifrakturCook";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/unifrakturcook-700.woff2") format("woff2");
+}
+
 * {
   box-sizing: border-box;
 }
@@ -64,8 +73,8 @@ button:hover {
 
 .topbar,
 .controls,
-.panel,
-.task-form {
+.todo-board,
+.panel {
   border: 1px solid var(--line);
   background: rgba(255, 253, 248, 0.88);
   box-shadow: var(--shadow);
@@ -118,12 +127,524 @@ h2 {
   white-space: nowrap;
 }
 
+.topbar-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.main-nav a {
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 253, 248, 0.7);
+  color: var(--teal);
+  font-weight: 800;
+}
+
+.main-nav a.active {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fffdf8;
+}
+
+.view {
+  display: grid;
+  gap: 22px;
+}
+
+.view-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .controls {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
   gap: 14px;
   border-radius: 8px;
   padding: 16px;
+}
+
+.profile-summary {
+  width: fit-content;
+  margin: -8px 0 0;
+  border: 1px solid rgba(31, 119, 109, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.72);
+  color: var(--teal);
+  padding: 8px 12px;
+  font-weight: 800;
+}
+
+.availability-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.82);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.availability-card p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.availability-form {
+  display: grid;
+  grid-template-columns: minmax(110px, 1fr) minmax(110px, 1fr) auto;
+  gap: 10px;
+  margin-top: 16px;
+  align-items: end;
+}
+
+.time-field {
+  gap: 8px;
+}
+
+.time-select {
+  position: relative;
+}
+
+.availability-form select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-height: 48px;
+  padding: 0 40px 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background-color: var(--panel);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231f776d' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.availability-form select:hover {
+  border-color: var(--teal);
+}
+
+.availability-form select:focus-visible {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(31, 119, 109, 0.18);
+}
+
+.availability-hint {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.availability-list {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.availability-list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(31, 119, 109, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.66);
+  padding: 10px;
+}
+
+.availability-list button {
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.todo-board {
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.todo-form {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(110px, 0.34fr) minmax(110px, 0.34fr) auto;
+  gap: 10px;
+}
+
+.todo-list {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.todo-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(31, 119, 109, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.66);
+  padding: 10px;
+}
+
+.todo-list li.done {
+  opacity: 0.6;
+}
+
+.todo-list li.done > span {
+  text-decoration: line-through;
+}
+
+.todo-list input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--teal);
+  cursor: pointer;
+}
+
+.carry-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(31, 119, 109, 0.12);
+  color: var(--teal);
+  font-size: 11px;
+  font-style: normal;
+  vertical-align: middle;
+}
+
+.todo-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.todo-list button {
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.board-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.board-pager-label {
+  min-width: 64px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--teal);
+}
+
+.pager-btn {
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--teal);
+  border: 1px solid var(--line);
+  font-weight: 800;
+}
+
+.pager-btn:hover:not(:disabled) {
+  border-color: var(--teal);
+  background: rgba(31, 119, 109, 0.06);
+}
+
+.pager-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.news-stand {
+  display: grid;
+  justify-items: center;
+  margin-top: 14px;
+}
+
+.news-sheet {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  background-color: #fbfaf6;
+  border: 1px solid #d9d4c7;
+  border-radius: 2px;
+  padding: 14px 14px 16px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 12px 26px rgba(23, 33, 27, 0.12);
+}
+
+.news-sheet.today {
+  background-color: #ffffff;
+  border-color: var(--ink);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 16px 34px rgba(23, 33, 27, 0.2);
+}
+
+.news-sheet.past {
+  background-color: #f1efe8;
+  opacity: 0.96;
+}
+
+.news-masthead {
+  text-align: center;
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: 6px;
+}
+
+.news-slogan {
+  margin: 0 0 4px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--muted);
+}
+
+.news-nameplate {
+  margin: 2px 0 6px;
+  font-family: "UnifrakturCook", Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(1.15rem, 1.9vw, 1.75rem);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.news-dateline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px 6px;
+  margin: 0;
+  padding-top: 5px;
+  border-top: 1px solid var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.news-edition {
+  order: 1;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.news-date {
+  order: 3;
+  flex: 1 0 100%;
+  text-align: center;
+}
+
+.news-meta {
+  order: 2;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.news-actionbar {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.news-articles {
+  gap: 0;
+  margin-top: 10px;
+}
+
+@media (min-width: 640px) {
+  .news-articles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 28px;
+    background: linear-gradient(rgba(23, 33, 27, 0.16), rgba(23, 33, 27, 0.16)) 50% 0 / 1px 100% no-repeat;
+  }
+}
+
+.news-articles li.ghost {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+}
+
+.news-articles li:not(.ghost) {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "check title actions"
+    "check meta  actions";
+  column-gap: 10px;
+  row-gap: 2px;
+  align-items: center;
+  border: none;
+  border-bottom: 1px solid rgba(23, 33, 27, 0.16);
+  border-radius: 0;
+  background: transparent;
+  padding: 10px 2px;
+}
+
+.news-articles li:not(.ghost):last-child {
+  border-bottom: none;
+}
+
+.news-articles li > input[type="checkbox"] {
+  grid-area: check;
+  align-self: start;
+  margin-top: 4px;
+}
+
+.news-articles li > span {
+  grid-area: title;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.news-articles li > strong {
+  grid-area: meta;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.news-articles li > .todo-actions {
+  grid-area: actions;
+}
+
+.news-articles .todo-actions {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.news-articles .todo-actions button {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.carry-all {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.ghost-btn {
+  background: transparent;
+  border: 1px solid rgba(31, 119, 109, 0.35);
+  color: var(--teal);
+}
+
+.time-ring {
+  width: 116px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(31, 119, 109, 0.12);
+}
+
+.time-ring::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(255, 253, 248, 0.72);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.time-ring-core {
+  width: 78px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  background: var(--panel);
+  color: var(--teal);
+  position: relative;
+  z-index: 1;
+}
+
+.time-ring-core strong {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.time-ring-core span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.time-tick {
+  position: absolute;
+  z-index: 2;
+  color: #175349;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 253, 248, 0.85);
+}
+
+.time-tick.top {
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.time-tick.right {
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+}
+
+.time-tick.bottom {
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.time-tick.left {
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
 }
 
 label {
@@ -144,29 +665,31 @@ select {
   padding: 0 12px;
 }
 
+.check-field {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  min-height: 68px;
+}
+
+.check-field input {
+  width: 20px;
+  min-height: 20px;
+  accent-color: var(--teal);
+}
+
 .board {
   display: grid;
   gap: 16px;
 }
 
-.task-form {
-  display: grid;
-  grid-template-columns: 1fr 150px auto;
-  gap: 12px;
-  border-radius: 8px;
-  padding: 14px;
-}
-
-.columns {
-  display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(320px, 1.08fr);
-  gap: 16px;
-}
-
 .panel {
-  min-height: 390px;
   border-radius: 8px;
   padding: 18px;
+}
+
+.plan-panel {
+  min-height: 0;
 }
 
 .panel.accent {
@@ -181,41 +704,16 @@ select {
   margin-bottom: 16px;
 }
 
-.task-list {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.task-item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 12px;
-  min-height: 56px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px;
-  background: #fffdf8;
-}
-
-.task-item strong {
-  overflow-wrap: anywhere;
-}
-
-.priority {
-  color: var(--coral);
-  font-weight: 800;
-}
-
 .ghost {
   color: var(--muted);
   border: 1px dashed var(--line);
   border-radius: 8px;
   padding: 18px;
   background: rgba(255, 253, 248, 0.58);
+}
+
+.ghost.compact {
+  display: block;
 }
 
 .plan {
@@ -238,8 +736,11 @@ select {
 @media (max-width: 760px) {
   .topbar,
   .controls,
-  .task-form,
-  .columns {
+  .availability-card,
+  .availability-form,
+  .availability-list li,
+  .todo-form,
+  .todo-list li {
     grid-template-columns: 1fr;
   }
 

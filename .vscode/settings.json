@@ -1,7 +1,7 @@
 {
   "accessibility.voice.speechLanguage": "ko-KR",
   "accessibility.voice.speechTimeout": 2500,
-  "accessibility.voice.autoSynthesize": true,
+  "accessibility.voice.autoSynthesize": "on",
   "accessibility.voice.keywordActivation": "chatInContext",
   "github.copilot.chat.agent.enabled": true,
   "github.copilot.chat.agent.runTasks": true

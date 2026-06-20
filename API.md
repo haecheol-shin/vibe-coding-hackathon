@@ -30,6 +30,93 @@ GET /health
 {"status":"ok"}
 ```
 
+## User Profile Summary
+
+사용자 정보 기능의 백엔드 계약입니다. 이름, 여러 가용 시간대, 코스피 투자 여부를 받아 총 가용 시간을 계산합니다.
+
+```http
+POST /api/user-profile/summary
+Content-Type: application/json
+```
+
+요청:
+
+```json
+{
+  "name": "민수",
+  "availability_windows": [
+    {"start": "09:00", "end": "10:00"},
+    {"start": "14:00", "end": "16:30"}
+  ],
+  "invests_in_kospi": true
+}
+```
+
+응답:
+
+```json
+{
+  "user_profile": {
+    "name": "민수",
+    "availability_windows": [
+      {"start": "09:00", "end": "10:00"},
+      {"start": "14:00", "end": "16:30"}
+    ],
+    "available_minutes": 210,
+    "usage_minutes": 210,
+    "invests_in_kospi": true
+  },
+  "total_available_minutes": 210,
+  "availability_summary": "09:00-10:00 (1h 0m), 14:00-16:30 (2h 30m)",
+  "invests_in_kospi": true
+}
+```
+
+자정을 넘기는 시간대도 지원합니다. 예를 들어 `22:00`부터 `01:00`까지는 `180`분으로 계산합니다.
+
+## Productivity Plan
+
+CopilotKit 액션과 같은 사용자 정보 계약을 사용하는 생산성 계획 API입니다.
+
+```http
+POST /api/productivity/plan
+Content-Type: application/json
+```
+
+요청:
+
+```json
+{
+  "tasks": [
+    {"title": "발표 데모 흐름 정리", "duration_minutes": 60, "block_count": 2},
+    {"title": "배포 확인", "duration_minutes": 30, "block_count": 1}
+  ],
+  "user_profile": {
+    "name": "민수",
+    "availability_windows": [
+      {"start": "09:00", "end": "10:00"},
+      {"start": "14:00", "end": "16:30"}
+    ],
+    "invests_in_kospi": true
+  }
+}
+```
+
+응답에는 정규화된 `user_profile`, 30분 단위로 자동 배분된 `focus_blocks`, `next_action`, `copilot_note`가 포함됩니다. `tasks`는 오늘의 투두 리스트이며 각 항목은 작업명 `title`과 소요 시간 `duration_minutes` 또는 블록 수 `block_count`를 보낼 수 있습니다. 한 블록은 30분입니다.
+
+`focus_blocks`는 사용자의 `availability_windows`를 기준으로 `start_time`, `end_time`, `time_range`를 함께 반환합니다. 시간대는 단순히 빠른 순서가 아니라, 오전 집중 시간대와 오후 안정 시간대를 우선하는 추천 점수로 최적화됩니다. 코스피 투자 중이면 장 시작 직후 시간은 집중 블록에서 살짝 뒤로 미룹니다.
+
+```json
+{
+  "label": "Block 1",
+  "minutes": 30,
+  "task": "발표 데모 흐름 정리",
+  "start_time": "09:00",
+  "end_time": "09:30",
+  "time_range": "09:00-09:30"
+}
+```
+
 ## Productivity Coach
 
 Copilot SDK를 사용하는 개인 생산성 코치 API입니다.
@@ -47,6 +134,14 @@ Content-Type: application/json
   "energy": 3,
   "mood": "calm",
   "focus_sessions": 1,
+  "user_profile": {
+    "name": "민수",
+    "availability_windows": [
+      {"start": "09:00", "end": "10:00"},
+      {"start": "14:00", "end": "16:30"}
+    ],
+    "invests_in_kospi": true
+  },
   "tasks": [
     {"title": "발표 데모 흐름 정리", "priority": "high", "done": false},
     {"title": "Azure 배포 확인", "priority": "medium", "done": true}

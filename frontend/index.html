@@ -14,78 +14,216 @@
             <p class="eyebrow">FocusFlow</p>
             <h1>Plan the next useful hour.</h1>
           </div>
-          <div class="sdk-status">{{ sdkStatus }}</div>
+          <div class="topbar-right">
+            <nav class="main-nav" aria-label="화면 전환">
+              <a href="#/availability" :class="{ active: currentView === 'availability' }">가용 시간</a>
+              <a href="#/todos" :class="{ active: currentView === 'todos' }">투두 보드</a>
+            </nav>
+            <div class="sdk-status">{{ sdkStatus }}</div>
+          </div>
         </header>
 
+        <div class="view" v-show="currentView === 'availability'">
         <section class="controls" aria-label="Planning controls">
           <label>
-            Energy
-            <select v-model="energy">
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
+            이름
+            <input v-model="userProfile.name" type="text" placeholder="예: 김코딩" autocomplete="name" @input="saveUserProfile" />
           </label>
-          <label>
-            Available minutes
-            <input v-model.number="availableMinutes" type="number" min="15" max="240" step="15" />
+          <label class="check-field">
+            <input v-model="userProfile.invests_in_kospi" type="checkbox" @change="saveUserProfile" />
+            코스피 투자 여부
           </label>
+        </section>
+        <p class="profile-summary">{{ profileSummary }}</p>
+
+        <section class="availability-card" aria-label="Available time chart">
+          <div class="time-ring" :style="availableTimeRingStyle">
+            <span class="time-tick top">00</span>
+            <span class="time-tick right">06</span>
+            <span class="time-tick bottom">12</span>
+            <span class="time-tick left">18</span>
+            <div class="time-ring-core">
+              <strong>{{ totalAvailableMinutes }}</strong>
+              <span>분</span>
+            </div>
+          </div>
+          <div>
+            <h2>오늘 가용 시간</h2>
+            <p>{{ availableTimeSummary }}</p>
+            <form class="availability-form" @submit.prevent="addAvailabilityWindow">
+              <label class="time-field">
+                <span>시작</span>
+                <div class="time-select">
+                  <select v-model="newAvailabilityWindow.start">
+                    <option v-for="time in timeOptions" :key="`start-${time}`" :value="time">{{ time }}</option>
+                  </select>
+                </div>
+              </label>
+              <label class="time-field">
+                <span>종료</span>
+                <div class="time-select">
+                  <select v-model="newAvailabilityWindow.end">
+                    <option v-for="time in timeOptions" :key="`end-${time}`" :value="time">{{ time }}</option>
+                  </select>
+                </div>
+              </label>
+              <button type="submit">추가</button>
+            </form>
+            <p class="availability-hint">선택한 시간대 {{ formatMinutes(newWindowMinutes) }} · 30분 단위로 추가돼요.</p>
+            <ul class="availability-list">
+              <li v-if="userProfile.availability_windows.length === 0" class="ghost compact">가용 시간대를 추가하세요.</li>
+              <li v-for="window in userProfile.availability_windows" :key="window.id">
+                <span>{{ window.start }} - {{ window.end }}</span>
+                <strong>{{ formatMinutes(windowMinutes(window)) }}</strong>
+                <button type="button" @click="removeAvailabilityWindow(window.id)">삭제</button>
+              </li>
+            </ul>
+          </div>
+        </section>
+        </div>
+
+        <div class="view" v-show="currentView === 'todos'">
+        <section class="view-toolbar" aria-label="Planning controls">
           <button type="button" :disabled="isPlanning" @click="askCopilot">
             {{ isPlanning ? "Planning" : "Ask Copilot" }}
           </button>
         </section>
 
-        <section class="board" aria-label="Task board">
-          <form class="task-form" @submit.prevent="addTask">
-            <input v-model="newTaskTitle" type="text" placeholder="Add a task" autocomplete="off" />
-            <select v-model="newTaskPriority" aria-label="Task priority">
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
-            </select>
-            <button type="submit">Add</button>
+        <section class="todo-board" aria-label="3일 투두 보드">
+          <div class="panel-heading">
+            <h2>투두 보드</h2>
+            <span>어제 · 오늘 · 내일</span>
+          </div>
+          <form class="todo-form" @submit.prevent="addTodo">
+            <label>
+              작업명
+              <input v-model="newTodoTitle" type="text" placeholder="예: 데모 시나리오 정리" autocomplete="off" />
+            </label>
+            <label>
+              소요 시간
+              <input v-model.number="newTodoMinutes" type="number" min="30" max="480" step="30" />
+            </label>
+            <label>
+              추가할 날짜
+              <select v-model="newTodoDay">
+                <option value="today">오늘</option>
+                <option value="tomorrow">내일</option>
+              </select>
+            </label>
+            <button type="submit">추가</button>
           </form>
 
-          <div class="columns">
-            <section class="panel" aria-label="Tasks">
-              <div class="panel-heading">
-                <h2>Tasks</h2>
-                <span>{{ tasks.length }}</span>
+          <div class="board-pager">
+            <button type="button" class="pager-btn" @click="prevDay" :disabled="boardOffset <= -1">◀ 이전</button>
+            <span class="board-pager-label">{{ boardLabel }}</span>
+            <button type="button" class="pager-btn" @click="nextDay" :disabled="boardOffset >= 1">이후 ▶</button>
+          </div>
+
+          <div class="news-stand">
+            <section class="news-sheet past" v-show="boardOffset === -1" aria-label="어제 투두">
+              <header class="news-masthead">
+                <p class="news-slogan">All the Tasks That's Fit to Finish</p>
+                <h3 class="news-nameplate">The FocusFlow Times</h3>
+                <p class="news-dateline">
+                  <span class="news-edition">어제</span>
+                  <span class="news-date">{{ yesterdayDate }}</span>
+                  <span class="news-meta">{{ blocksFor(yesterdayTodos) }} BLOCKS</span>
+                </p>
+              </header>
+              <div v-if="yesterdayUnfinished > 0" class="news-actionbar">
+                <button type="button" class="carry-all" @click="carryAllToToday">
+                  남은 {{ yesterdayUnfinished }}개 오늘로
+                </button>
               </div>
-              <ul class="task-list">
-                <li v-if="tasks.length === 0" class="ghost">Add one task to start planning.</li>
-                <li v-for="task in tasks" :key="task.id" class="task-item">
-                  <div>
-                    <strong>{{ task.title }}</strong>
-                    <span class="priority">{{ task.priority }}</span>
+              <ul class="todo-list news-articles">
+                <li v-if="yesterdayTodos.length === 0" class="ghost compact">어제 기록이 없습니다.</li>
+                <li v-for="todo in yesterdayTodos" :key="todo.id" :class="{ done: todo.done }">
+                  <input type="checkbox" :checked="todo.done" @change="toggleTodo(todo.id)" :aria-label="todo.title + ' 완료'" />
+                  <span>{{ todo.title }}</span>
+                  <strong>{{ todoBlockCount(todo) }}블록 · {{ formatMinutes(todo.duration_minutes) }}</strong>
+                  <div class="todo-actions">
+                    <button v-if="!todo.done" type="button" class="ghost-btn" @click="carryTodoToToday(todo.id)">오늘로</button>
+                    <button type="button" @click="removeTodo(todo.id)">삭제</button>
                   </div>
-                  <button type="button" aria-label="Remove task" @click="removeTask(task.id)">Done</button>
                 </li>
               </ul>
             </section>
 
-            <section class="panel accent" aria-label="Copilot plan">
-              <div class="panel-heading">
-                <h2>Copilot plan</h2>
-                <span>{{ planMeta }}</span>
-              </div>
-              <div class="plan">
-                <p v-if="planError" class="ghost">Copilot planning is unavailable right now.</p>
-                <template v-else-if="plan">
-                  <article class="plan-card">
-                    <strong>Next action</strong>
-                    <span>{{ plan.next_action }}</span>
-                  </article>
-                  <article v-for="block in plan.focus_blocks" :key="block.label" class="plan-card">
-                    <strong>{{ block.label }} - {{ block.minutes }} min</strong>
-                    <span>{{ block.task }}</span>
-                  </article>
-                  <p class="ghost">{{ plan.copilot_note }}</p>
-                </template>
-                <p v-else class="ghost">Ask Copilot to shape your next focus blocks.</p>
-              </div>
+            <section class="news-sheet today" v-show="boardOffset === 0" aria-label="오늘 투두">
+              <header class="news-masthead">
+                <p class="news-slogan">All the Tasks That's Fit to Finish</p>
+                <h3 class="news-nameplate">The FocusFlow Times</h3>
+                <p class="news-dateline">
+                  <span class="news-edition">오늘</span>
+                  <span class="news-date">{{ todayDate }}</span>
+                  <span class="news-meta">{{ blocksFor(todayTodos) }} BLOCKS</span>
+                </p>
+              </header>
+              <ul class="todo-list news-articles">
+                <li v-if="todayTodos.length === 0" class="ghost compact">오늘 할 일을 추가하세요. 소요 시간은 30분 블록으로 자동 배분됩니다.</li>
+                <li v-for="todo in todayTodos" :key="todo.id" :class="{ done: todo.done }">
+                  <input type="checkbox" :checked="todo.done" @change="toggleTodo(todo.id)" :aria-label="todo.title + ' 완료'" />
+                  <span>
+                    {{ todo.title }}
+                    <em v-if="todo.carriedOver" class="carry-badge">어제에서 이어옴</em>
+                  </span>
+                  <strong>{{ todoBlockCount(todo) }}블록 · {{ formatMinutes(todo.duration_minutes) }}</strong>
+                  <div class="todo-actions">
+                    <button type="button" @click="removeTodo(todo.id)">삭제</button>
+                  </div>
+                </li>
+              </ul>
+            </section>
+
+            <section class="news-sheet" v-show="boardOffset === 1" aria-label="내일 투두">
+              <header class="news-masthead">
+                <p class="news-slogan">All the Tasks That's Fit to Finish</p>
+                <h3 class="news-nameplate">The FocusFlow Times</h3>
+                <p class="news-dateline">
+                  <span class="news-edition">내일</span>
+                  <span class="news-date">{{ tomorrowDate }}</span>
+                  <span class="news-meta">{{ blocksFor(tomorrowTodos) }} BLOCKS</span>
+                </p>
+              </header>
+              <ul class="todo-list news-articles">
+                <li v-if="tomorrowTodos.length === 0" class="ghost compact">내일 미리 준비할 일을 추가하세요.</li>
+                <li v-for="todo in tomorrowTodos" :key="todo.id" :class="{ done: todo.done }">
+                  <input type="checkbox" :checked="todo.done" @change="toggleTodo(todo.id)" :aria-label="todo.title + ' 완료'" />
+                  <span>{{ todo.title }}</span>
+                  <strong>{{ todoBlockCount(todo) }}블록 · {{ formatMinutes(todo.duration_minutes) }}</strong>
+                  <div class="todo-actions">
+                    <button type="button" @click="removeTodo(todo.id)">삭제</button>
+                  </div>
+                </li>
+              </ul>
             </section>
           </div>
         </section>
+
+        <section class="board" aria-label="Copilot plan">
+          <section class="panel accent plan-panel" aria-label="Copilot plan">
+            <div class="panel-heading">
+              <h2>Copilot plan</h2>
+              <span>{{ planMeta }}</span>
+            </div>
+            <div class="plan">
+              <p v-if="planError" class="ghost">Copilot planning is unavailable right now.</p>
+              <template v-else-if="plan">
+                <article class="plan-card">
+                  <strong>Next action</strong>
+                  <span>{{ plan.next_action }}</span>
+                </article>
+                <article v-for="block in plan.focus_blocks" :key="block.label" class="plan-card">
+                  <strong>{{ block.time_range || block.label }} · {{ block.minutes }} min</strong>
+                  <span>{{ block.task }}</span>
+                </article>
+                <p class="ghost">{{ visibleCopilotNote }}</p>
+              </template>
+              <p v-else class="ghost">Ask Copilot to shape your next focus blocks.</p>
+            </div>
+          </section>
+        </section>
+        </div>
       </section>
     </main>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
